@@ -54,7 +54,7 @@ const GuideContent = () => (
         <p>Khi một gói tin bị mất (ví dụ gói số 2), hiện tượng sau sẽ xảy ra:</p>
         <ol className="list-decimal list-inside space-y-2 ml-2">
             <li>Sender vẫn tiếp tục gửi các gói tiếp theo (3, 4...) nếu còn chỗ trong cửa sổ.</li>
-            <li>Receiver nhận được 3, 4 nhưng thấy thiếu 2 -> Receiver <strong>hủy bỏ</strong> 3, 4 và gửi lại ACK của gói 1 (gói đúng gần nhất).</li>
+            <li>Receiver nhận được 3, 4 nhưng thấy thiếu 2 -> Receiver <strong>hủy bỏ</strong> 3, 4 (Im lặng, không gửi ACK).</li>
             <li>Sender chờ mãi không thấy ACK cho gói 2.</li>
             <li><strong>Timeout:</strong> Khi thanh thời gian chờ (Timer) đầy, Sender nhận ra gói 2 đã mất.</li>
             <li><strong>Gửi lại:</strong> Sender lùi lại và gửi lại toàn bộ từ gói số 2 trở đi.</li>
@@ -350,21 +350,10 @@ export default function App() {
               nextPackets.push(ackPacket);
 
             } else {
-              addLog(`Receiver: Nhận gói ${p.seqNum} sai thứ tự (Chờ: ${receiverExpected}). Hủy bỏ.`, 'warning');
-              // Optionally send ACK for last received correctly (Go-Back-N behavior)
-              if (receiverExpected > 0) {
-                 const reAck: Packet = {
-                    id: `ack-${receiverExpected - 1}-${Date.now()}`,
-                    type: 'ACK',
-                    seqNum: receiverExpected - 1,
-                    from: 'RECEIVER',
-                    to: 'SENDER',
-                    progress: 0,
-                    status: 'IN_FLIGHT',
-                    color: '#10b981'
-                  };
-                  nextPackets.push(reAck);
-              }
+              // --- CHANGED LOGIC HERE ---
+              addLog(`Receiver: Nhận gói ${p.seqNum} sai thứ tự (Chờ: ${receiverExpected}). Hủy bỏ & Không gửi ACK.`, 'warning');
+              // We do NOT send a duplicate ACK here anymore. 
+              // We rely entirely on the Sender's Timeout to resend.
             }
           } else if (p.to === 'SENDER' && p.type === 'ACK') {
             // Logic at Sender
