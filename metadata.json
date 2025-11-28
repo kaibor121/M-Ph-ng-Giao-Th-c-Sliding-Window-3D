@@ -1,0 +1,5 @@
+{
+  "name": "Mô Phỏng Giao Thức Sliding Window 3D",
+  "description": "Ứng dụng trực quan hóa 3D quy trình hoạt động của giao thức Sliding Window trong mạng máy tính, mô phỏng truyền tải dữ liệu và cơ chế ACK.",
+  "requestFramePermissions": []
+}
